@@ -5,7 +5,7 @@ from pathlib import Path
 import tvMazeAPI
 import os
 import sys
-sys.path.insert(0, '../+utility/')
+
 import python_utility as pyut
 
 ##########################################
