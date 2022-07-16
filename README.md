@@ -40,11 +40,9 @@ on MacOS are installed by default, didn't tried on other os sorry.
 
 ## Output be like:
 
-![Output example](https://github.com/albertomorini/albertomorini/blob/main/nexter/imgExample/example.png)
+![Output example](https://github.com/albertomorini/nexter/blob/main/imgExample/example.png)
 
 ### Calendar's event output:
 
-![Output example](https://github.com/albertomorini/albertomorini/blob/main/nexter/imgExample/1.png)
-![Output example](https://github.com/albertomorini/albertomorini/blob/main/nexter/imgExample/2.png)
-
-
+![Output example](https://github.com/albertomorini/nexter/blob/main/imgExample/1.png)
+![Output example](https://github.com/albertomorini/nexter/blob/main/imgExample/2.png)
