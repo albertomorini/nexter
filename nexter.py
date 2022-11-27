@@ -41,7 +41,6 @@ def printRunningSeries(dictShows):
 def createiCloudEvents(nameShow, dateNextEpisode):
 
 	cal = Calendar()
-	#cal.add('attendee', 'MAILTO:abc@example.com')
 
 	event = Event()
 	event.add('summary', nameShow) #tv show's title
@@ -53,9 +52,7 @@ def createiCloudEvents(nameShow, dateNextEpisode):
 
 	# Adding events to calendar
 	cal.add_component(event)
-
-	directory = str(Path(__file__).parent.parent) + "/events/"
-	f = open(os.path.join(directory, nameShow+'.ics'), 'wb')
+	f = open(os.path.join("./events/", nameShow+'.ics'), 'wb')
 	f.write(cal.to_ical())
 	f.close()
 

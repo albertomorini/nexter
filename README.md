@@ -5,7 +5,7 @@ Nexter scans your TvShows's directory and for each folder it will search on <a h
 It will also count how seasons you have of the all seasons that exists of that show.
 
 
-**Attention:** I assume a good structure of your media library, like Kodi/Plex does where in the TvShows there is a single folder for each Show and inside this there is a single folder for each season.
+**Attention:** I assume a good structure of your media library: a parent directory which store a folder for each episode and then a single folder for each season.
 **Example**
 >
 	TvSeries/
@@ -32,7 +32,7 @@ I use my python utility file "+utility/python_utility.py", you can find it on th
 
 * option 1: show all tv series
 * option 2: print just the running tv shows
-* option 3: create an .ics file for each tv show having the date of the next episode, you have to manually open these file with calendar (iCloud) to create the events.
+* option 3: create an .ics file for each tv show having the date of the next episode, you have to manually open these file with your calendar app.
 
 
 **Warning:** I print some emoji on terminal, this could cause some problems if you doesn't have any emoji pack installed.
