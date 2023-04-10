@@ -5,33 +5,30 @@ from pathlib import Path
 import tvMazeAPI
 import os
 import sys
+import platform 
 
 import python_utility as pyut
 
 ##########################################
 #printing
-def printNewsTerminal(dictShows):
+def printData(show):
+	print(i + "("+show.get("rating") +")") #name of series and the rating
+
+	print("\t#Seasons: "+show.get("seasons")+" - (and "+show.get("seasonOwned")+" owned)")
+	print("\tStatus: "+show.get("status"))
+
+	print("\tDate of last episode: "+show.get("lastEpisodeDate"))
+	print("\tNext episode: "+show.get("nextEpisode"))
+	print("_____________________")
+
+def filterPrinting(dictShows,justRunning=False):
 	for i in dictShows:
-		if(dictShows[i].get("founded")):
-			print(i + "("+dictShows[i].get("rating") +")") #name of series and the rating
-
-			print("\t#Seasons: "+dictShows[i].get("seasons")+" - (and "+dictShows[i].get("seasonOwned")+" owned)")
-			print("\tStatus: "+dictShows[i].get("status"))
-
-			print("\tDate of last episode: "+dictShows[i].get("lastEpisodeDate"))
-			print("\tNext episode: "+dictShows[i].get("nextEpisode"))
-			print("_____________________")
-		else:
+		if(justRunning and dictShows[i].get("status")=="Running"):
+			printData(dictShows[i])			
+		elif(not justRunning and dictShows[i].get("founded")):
+			printData(dictShows[i])			
+		elif(not dictShows[i].get("founded")):
 			print("SHOWS NOT FOUND: "+i)
-			print("_____________________")
-
-def printRunningSeries(dictShows):
-	for i in dictShows:
-		if(dictShows[i].get("founded") and dictShows[i].get("status")=="Running"):
-			print(i + "("+dictShows[i].get("rating") +")") #name of series and the rating
-			print("\t#Seasons: "+dictShows[i].get("seasons")+" - (and "+dictShows[i].get("seasonOwned")+" owned)")
-			print("\tDate of last episode: "+dictShows[i].get("lastEpisodeDate"))
-			print("\tNext episode: "+dictShows[i].get("nextEpisode"))
 			print("_____________________")
 
 
@@ -50,20 +47,27 @@ def createiCloudEvents(nameShow, dateNextEpisode):
 	event.add('dtend', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]), 22, 0, 0, tzinfo=pytz.utc))
 	event.add('dtstamp', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]), 0, 0, 0, tzinfo=pytz.utc))
 
+	# TODO: a better way to store into filesysyem.. like save the hash of the name of the show
+	outputPath=os.path.join("./events/", nameShow.replace(" ","").replace("&","-")+'.ics') #replace white space for a easier managemeent on file system 
 	# Adding events to calendar
 	cal.add_component(event)
-	f = open(os.path.join("./events/", nameShow+'.ics'), 'wb')
+	f = open(outputPath, 'wb')
 	f.write(cal.to_ical())
 	f.close()
+	return outputPath
 
 def processJSONToCalendar(dictShows):
 
 	for x in dictShows:
 		if(dictShows[x].get("founded")== True and dictShows[x].get("nextEpisode") != "No info yet" ):
-			createiCloudEvents(x, dictShows[x].get("nextEpisode"))
+			outputPath = createiCloudEvents(x, dictShows[x].get("nextEpisode"))
+			# event created, try to open with default calendar
+			if(platform.system()=="Darwin"):
+				os.system("open "+str(outputPath))
+			elif(platform.system()=="Windows"):
+				pass # I really don't know windows
 			print("Show: "+x + " on: "+ dictShows[x].get("nextEpisode"))
 	print("\n --Events created on /events/ subfolder--")
-
 
 ########################################################
 def getNumSeasonOwned(path,show):
@@ -97,19 +101,21 @@ def getNews(path):
 ###############################################################
 def menu(path):
 
-	print("Welcome!\n"+" 1) fetch all shows\n 2) the news only of the running series\n 3) create iCloud events for new episodes")
-	x = input("Enter your choice: ")
-	x = int(x)
+	#check if mode is passed as argument
+	if(len(sys.argv)>1):
+		x= int(sys.argv[1])
+	else:
+		print("Welcome!\n"+" 1) fetch all shows\n 2) the news only of the running series\n 3) create iCloud events for new episodes")
+		x = input("Enter your choice: ")
+		x = int(x)
+
 	res = getNews(path)
 	pyut.serialize_JSON(".","tvShowsReport.json",res)
 	if(x==1):
-		printNewsTerminal(res)
+		filterPrinting(res)
 	elif(x==2):
-		printRunningSeries(res)
+		filterPrinting(res,True)
 	elif(x==3):
 		processJSONToCalendar(res)
-
-
-
 
 menu("/Volumes/Media/TvShows")
