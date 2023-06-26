@@ -5,36 +5,49 @@ from pathlib import Path
 import tvMazeAPI
 import os
 import sys
-import platform 
+import json
 
-import python_utility as pyut
+### Utility
+
+def serializeJSON(dir, filename, dataDictionary):
+	with open(dir+"/"+filename,"a", encoding='utf-8') as fileToStore:
+   		json.dump(dataDictionary, fileToStore, ensure_ascii=False)
+
+def readJson(path):
+	with open(path) as dataStored:
+		return json.load(dataStored)
 
 ##########################################
-#printing
-def printData(show):
-	print(i + "("+show.get("rating") +")") #name of series and the rating
+# PRINTING STUFF
 
+## print the info of a show
+# @param show [Object] the show we'd like to print
+def printData(nameofshow, show):
+	print(nameofshow+"("+show.get("rating") +")") #name of series and the rating
 	print("\t#Seasons: "+show.get("seasons")+" - (and "+show.get("seasonOwned")+" owned)")
 	print("\tStatus: "+show.get("status"))
-
 	print("\tDate of last episode: "+show.get("lastEpisodeDate"))
 	print("\tNext episode: "+show.get("nextEpisode"))
 	print("_____________________")
 
+## apply a fielter on printing list
 def filterPrinting(dictShows,justRunning=False):
 	for i in dictShows:
-		if(justRunning and dictShows[i].get("status")=="Running"):
-			printData(dictShows[i])			
-		elif(not justRunning and dictShows[i].get("founded")):
-			printData(dictShows[i])			
+		if(justRunning and dictShows[i].get("status")=="Running"): ## only the shows in status running
+			printData(i,dictShows[i])			
+		elif(not justRunning and dictShows[i].get("founded")): ## all the shows
+			printData(i,dictShows[i])			
 		elif(not dictShows[i].get("founded")):
 			print("SHOWS NOT FOUND: "+i)
 			print("_____________________")
 
 
 #############################################
-#create calendar events (ics ~ iCal)
+# CALENDAR STUFF
 
+# create an ics event
+# @nameShow [string] the name of the show (title of the event)
+# @dateNextEpisode [string] date of the next episode
 def createiCloudEvents(nameShow, dateNextEpisode):
 
 	cal = Calendar()
@@ -56,8 +69,9 @@ def createiCloudEvents(nameShow, dateNextEpisode):
 	f.close()
 	return outputPath
 
-def processJSONToCalendar(dictShows):
 
+# from the json registry translate the shows into calendar's events
+def processJSONToCalendar(dictShows):
 	for x in dictShows:
 		if(dictShows[x].get("founded")== True and dictShows[x].get("nextEpisode") != "No info yet" ):
 			outputPath = createiCloudEvents(x, dictShows[x].get("nextEpisode"))
@@ -70,11 +84,12 @@ def processJSONToCalendar(dictShows):
 	print("\n --Events created on /events/ subfolder--")
 
 ########################################################
+# return the number of the seasons owned on disk
 def getNumSeasonOwned(path,show):
 	return str(len(next(os.walk(path+"/"+show))[1]))
 
 #create shows dict.
-#@path string of the tvshows path
+#@path [string] of the tvshows path
 def getNews(path):
 	dictShows = {}
 	tvShows = next(os.walk(path))[1]
@@ -99,23 +114,46 @@ def getNews(path):
 	return dictShows
 
 ###############################################################
-def menu(path):
 
+# allows the user to insert the root path of the tvshows dir
+def insertPath():
+	isValid=False
+	rootPath = ""
+	while(not isValid and rootPath!="q"):
+		rootPath = input("Insert the root directory: ")
+		if os.path.exists(rootPath): # directory doesn't exists
+			try:
+				if(os.chdir(rootPath)==None): # can't access to the folder, missing permission
+					isValid=True
+			except PermissionError:
+				print ("Access tenied to:", rootPath)
+		else:
+			print("Path doesn't exists, retry (or insert 'q' to quit)")
+
+	return rootPath
+
+def menu():
+
+	path=""
 	#check if mode is passed as argument
 	if(len(sys.argv)>1):
-		x= int(sys.argv[1])
+		path=sys.argv[1] #path
+		x= int(sys.argv[2]) #mode
 	else:
+		path=insertPath()
 		print("Welcome!\n"+" 1) fetch all shows\n 2) the news only of the running series\n 3) create iCloud events for new episodes")
-		x = input("Enter your choice: ")
-		x = int(x)
+		x = int(input("Enter your choice: "))
 
-	res = getNews(path)
-	pyut.serialize_JSON(".","tvShowsReport.json",res)
+	## get the news and store it into a report
+	news = getNews(path)
+	serializeJSON("./","tvShowsReport.json",news)
 	if(x==1):
-		filterPrinting(res)
+		filterPrinting(news)
 	elif(x==2):
-		filterPrinting(res,True)
+		filterPrinting(news,True)
 	elif(x==3):
-		processJSONToCalendar(res)
+		processJSONToCalendar(news)
 
-menu("/Volumes/Media/TvShows")
+
+
+menu()

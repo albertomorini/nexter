@@ -1,48 +1,34 @@
 # Nexter a simply tv tracker.
 
-Nexter scans your TvShows's directory and for each folder it will search on <a href="https://tvmaze.com>">TvMaze</a> the info related.
-
-It will also count how seasons you have of the all seasons that exists of that show.
+Nexter gives you info about TvShows you're watching, like the date of next episode and will create an event on your calendar of it.
 
 
-**Attention:** I assume a good structure of your media library: a parent directory which store a folder for each episode and then a single folder for each season.
-**Example**
->
-	TvSeries/
-		Euphoria/
-			Extras/
-				Episode1.mkv
-				Episode2.mkv
-			Season1/
-				Episode1.mkv
-				...
-				Episode8.mkv
-		Dexter/
-			Season1/
-				...
-			...
-			Season8/
-		...
+## The idea
 
-## Dependencies:
-I use my python utility file "+utility/python_utility.py", you can find it on the parent of this folder.
+Fed up of missing shows episode, I created this script which fetch on  <a href="https://tvmaze.com>">TvMaze</a> the date and create in my calendar the event (.ics, importend on my calendar by a script).
+
+And, gives you info if there'll be another seasons or if the shows has been cancelled.
+
+### Some example
+
+![Output example](./imgExample/example.png)
+
+### Calendar's event:
+
+![Output example](./imgExample/1.png)
+![Output example](./imgExample/2.png)
+
+
 
 ## Usage
-`$ python3 tvTracker.py`
+
+`$ python3 nexter.py`
 
 * option 1: show all tv series
 * option 2: print just the running tv shows
 * option 3: create an .ics file for each tv show having the date of the next episode, you have to manually open these file with your calendar app.
 
+### Warning
 
-**Warning:** I print some emoji on terminal, this could cause some problems if you doesn't have any emoji pack installed.
-on MacOS are installed by default, didn't tried on other os sorry.
-
-## Output be like:
-
-![Output example](https://github.com/albertomorini/nexter/blob/main/imgExample/example.png)
-
-### Calendar's event output:
-
-![Output example](https://github.com/albertomorini/nexter/blob/main/imgExample/1.png)
-![Output example](https://github.com/albertomorini/nexter/blob/main/imgExample/2.png)
+1. I print some emoji in terminal (by kind of the show), this, could cause some problem if you haven't got any charset installer.
+2. I assume a good structure of your media library: root > show > seasons > episodes
