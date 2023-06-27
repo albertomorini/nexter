@@ -17,10 +17,12 @@ def readJson(path):
 	with open(path) as dataStored:
 		return json.load(dataStored)
 
-##########################################
+def doMD5(digest):
+	return hashlib.md5(digest.encode()).hexdigest()
 # PRINTING STUFF
 
 ## print the info of a show
+# @param nameofshow [string] the name of the show (makes key into the dataset)
 # @param show [Object] the show we'd like to print
 def printData(nameofshow, show):
 	print(nameofshow+"("+show.get("rating") +")") #name of series and the rating
@@ -48,40 +50,42 @@ def filterPrinting(dictShows,justRunning=False):
 # create an ics event
 # @nameShow [string] the name of the show (title of the event)
 # @dateNextEpisode [string] date of the next episode
-def createiCloudEvents(nameShow, dateNextEpisode):
-
-	cal = Calendar()
+# return the path of the ics file
+def createCalendarEvent(nameShow, dateNextEpisode):
 
 	event = Event()
 	event.add('summary', nameShow) #tv show's title
-	dateTMP = dateNextEpisode.split("-")
-	print()
+	dateTMP = dateNextEpisode.split("-") # get just the date
+
+	# create the event that will be in the evening 21-22.
 	event.add('dtstart', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]),21, 0, 0, tzinfo=pytz.utc))
 	event.add('dtend', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]), 22, 0, 0, tzinfo=pytz.utc))
 	event.add('dtstamp', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]), 0, 0, 0, tzinfo=pytz.utc))
 
-	# TODO: a better way to store into filesysyem.. like save the hash of the name of the show
-	outputPath=os.path.join("./events/", nameShow.replace(" ","").replace("&","-")+'.ics') #replace white space for a easier managemeent on file system 
+	outputPath=os.path.join("./events/", doMD5(nameShow)+'.ics') #store the event as ics (hash of the tvshow title)
+
 	# Adding events to calendar
+	cal = Calendar()
 	cal.add_component(event)
+	#store the ics file
 	f = open(outputPath, 'wb')
 	f.write(cal.to_ical())
 	f.close()
-	return outputPath
+	return outputPath 
 
 
-# from the json registry translate the shows into calendar's events
-def processJSONToCalendar(dictShows):
+# create the ics event and opens with default calendar app
+def updateCalender(dictShows):
 	for x in dictShows:
 		if(dictShows[x].get("founded")== True and dictShows[x].get("nextEpisode") != "No info yet" ):
-			outputPath = createiCloudEvents(x, dictShows[x].get("nextEpisode"))
+			outputPath = createCalendarEvent(x, dictShows[x].get("nextEpisode"))
 			# event created, try to open with default calendar
 			if(platform.system()=="Darwin"):
 				os.system("open "+str(outputPath))
+				os.remove(outputPath) #remove the event once opened in the calendar
 			elif(platform.system()=="Windows"):
-				pass # I really don't know windows
-			print("Show: "+x + " on: "+ dictShows[x].get("nextEpisode"))
-	print("\n --Events created on /events/ subfolder--")
+				pass #TODO: I really don't know windows
+
 
 ########################################################
 # return the number of the seasons owned on disk
@@ -95,7 +99,6 @@ def getNews(path):
 	tvShows = next(os.walk(path))[1]
 
 	for i in tvShows:
-
 		info = i.split("(")[0] #remove stuff like year that could bring us different results
 		info = tvMazeAPI.getInfo(info)
 		if(info != None):
@@ -116,7 +119,7 @@ def getNews(path):
 ###############################################################
 
 # allows the user to insert the root path of the tvshows dir
-def insertPath():
+def insertRootPath():
 	isValid=False
 	rootPath = ""
 	while(not isValid and rootPath!="q"):
@@ -133,14 +136,13 @@ def insertPath():
 	return rootPath
 
 def menu():
-
 	path=""
 	#check if mode is passed as argument
 	if(len(sys.argv)>1):
 		path=sys.argv[1] #path
 		x= int(sys.argv[2]) #mode
 	else:
-		path=insertPath()
+		path=insertRootPath()
 		print("Welcome!\n"+" 1) fetch all shows\n 2) the news only of the running series\n 3) create iCloud events for new episodes")
 		x = int(input("Enter your choice: "))
 
@@ -149,11 +151,9 @@ def menu():
 	serializeJSON("./","tvShowsReport.json",news)
 	if(x==1):
 		filterPrinting(news)
-	elif(x==2):
-		filterPrinting(news,True)
+	elif(x==2): #just running
+		filterPrinting(news,True) 
 	elif(x==3):
-		processJSONToCalendar(news)
-
-
+		updateCalender(news)
 
 menu()
