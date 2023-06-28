@@ -1,20 +1,23 @@
 import requests
 import re
 
+tvMazeBaseUrl="https://api.tvmaze.com/"
+tvMazeShowsUrl=tvMazeBaseUrl+"shows/"
+
 ########################
 # make the query
 #return info of a single tv show
 def getInfo(nameShow):
 	#remove points and punctuaction that can bring us wrong results
 	info = re.sub('[^A-Za-z0-9]+', '-', nameShow)
-	info = requests.get('https://api.tvmaze.com/singlesearch/shows?q='+nameShow)
+	info = requests.get(tvMazeBaseUrl+'singlesearch/shows?q='+nameShow)
 	info = info.json()
 	return info
 
 #return an array with all the tv shows that match the name provided.
 def getShowsResults(nameShow):
 	info = re.sub('[^A-Za-z0-9]+', ' ', nameShow)
-	info = requests.get("https://api.tvmaze.com/search/shows?q="+nameShow)
+	info = requests.get(tvMazeBaseUrl+"search/shows?q="+nameShow)
 	info = info.json()
 	return info
 
@@ -25,7 +28,7 @@ def getShowsResults(nameShow):
 #return the title of a single episode
 def getTitleEpisode(info, season, numberEpisode):
 	try:
-		url ='https://api.tvmaze.com/shows/'+str(info.get("id"))+'/episodebynumber?season='+season+'&number='+str(numberEpisode)
+		url =tvMazeShowsUrl+str(info.get("id"))+'/episodebynumber?season='+season+'&number='+str(numberEpisode)
 		title = requests.get(url)
 		return title.json().get("name")
 	except Exception as e:
@@ -34,7 +37,7 @@ def getTitleEpisode(info, season, numberEpisode):
 #return minutes of the duration of the episode
 def getRuntimeEpisode(info, season, numberEpisode):
 	try:
-		url ='https://api.tvmaze.com/shows/'+str(info.get("id"))+'/episodebynumber?season='+season+'&number='+str(numberEpisode)
+		url =tvMazeShowsUrl+str(info.get("id"))+'/episodebynumber?season='+season+'&number='+str(numberEpisode)
 		title = requests.get(url)
 		return title.json().get("runtime")
 	except Exception as e:
@@ -42,13 +45,12 @@ def getRuntimeEpisode(info, season, numberEpisode):
 
 def getSummaryEpisode(info,season,numberEpisode):
 	try:
-		url ='https://api.tvmaze.com/shows/'+str(info.get("id"))+'/episodebynumber?season='+season+'&number='+str(numberEpisode)
+		url =tvMazeShowsUrl+str(info.get("id"))+'/episodebynumber?season='+season+'&number='+str(numberEpisode)
 		title = requests.get(url)
 		return title.json().get("summary")
 	except Exception as e:
 		return "info not found"
 
-##############################
 
 #return the date of the next episode
 def getNextEpisode(info):
@@ -62,7 +64,7 @@ def getNextEpisode(info):
 
 #return the date of the last episode
 def getDateLastEpisode(info):
-	seasons= requests.get('https://api.tvmaze.com/shows/'+str(info.get("id"))+"/seasons")
+	seasons= requests.get(tvMazeShowsUrl+str(info.get("id"))+"/seasons")
 	seasons = seasons.json()
 	lastEpisode=""
 	#we have to get the greatest date, not the date of the last episode (it couldn't be determined yet)
@@ -74,9 +76,13 @@ def getDateLastEpisode(info):
 
 #return the number of seasons
 def getNumberOfSeasons(info):
-	seasons= requests.get('https://api.tvmaze.com/shows/'+str(info.get("id"))+"/seasons")
+	seasons= requests.get(tvMazeShowsUrl+str(info.get("id"))+"/seasons")
 	seasons = seasons.json()
 	return str(len(seasons))
+
+
+##############################
+
 
 #return the status (still running or termined or something)
 def getStatus(info):

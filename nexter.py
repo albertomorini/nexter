@@ -6,8 +6,11 @@ import tvMazeAPI
 import os
 import sys
 import json
+import hashlib
+import platform
 
-### Utility
+##########################################
+### UTILITY
 
 def serializeJSON(dir, filename, dataDictionary):
 	with open(dir+"/"+filename,"a", encoding='utf-8') as fileToStore:
@@ -19,6 +22,8 @@ def readJson(path):
 
 def doMD5(digest):
 	return hashlib.md5(digest.encode()).hexdigest()
+
+##########################################
 # PRINTING STUFF
 
 ## print the info of a show
@@ -52,11 +57,10 @@ def filterPrinting(dictShows,justRunning=False):
 # @dateNextEpisode [string] date of the next episode
 # return the path of the ics file
 def createCalendarEvent(nameShow, dateNextEpisode):
-
+	cal = Calendar()
 	event = Event()
 	event.add('summary', nameShow) #tv show's title
 	dateTMP = dateNextEpisode.split("-") # get just the date
-
 	# create the event that will be in the evening 21-22.
 	event.add('dtstart', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]),21, 0, 0, tzinfo=pytz.utc))
 	event.add('dtend', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]), 22, 0, 0, tzinfo=pytz.utc))
@@ -65,7 +69,6 @@ def createCalendarEvent(nameShow, dateNextEpisode):
 	outputPath=os.path.join("./events/", doMD5(nameShow)+'.ics') #store the event as ics (hash of the tvshow title)
 
 	# Adding events to calendar
-	cal = Calendar()
 	cal.add_component(event)
 	#store the ics file
 	f = open(outputPath, 'wb')
@@ -82,12 +85,21 @@ def updateCalender(dictShows):
 			# event created, try to open with default calendar
 			if(platform.system()=="Darwin"):
 				os.system("open "+str(outputPath))
-				os.remove(outputPath) #remove the event once opened in the calendar
 			elif(platform.system()=="Windows"):
 				pass #TODO: I really don't know windows
 
+	print("Done! Check your calendar app")
+	cleanEventsFolder()
+
+## remove the files created even if the old event doesn't bother us (we're going to overwrite on the next scan, cause file is stored with hash of tv title) 
+def cleanEventsFolder():
+	eventPath=os.path.join(os.getcwd(),"events")
+	for event in os.listdir(eventPath):
+		os.remove(os.path.join(eventPath,event))
 
 ########################################################
+# MAIN
+
 # return the number of the seasons owned on disk
 def getNumSeasonOwned(path,show):
 	return str(len(next(os.walk(path+"/"+show))[1]))
@@ -116,8 +128,6 @@ def getNews(path):
 
 	return dictShows
 
-###############################################################
-
 # allows the user to insert the root path of the tvshows dir
 def insertRootPath():
 	isValid=False
@@ -125,11 +135,7 @@ def insertRootPath():
 	while(not isValid and rootPath!="q"):
 		rootPath = input("Insert the root directory: ")
 		if os.path.exists(rootPath): # directory doesn't exists
-			try:
-				if(os.chdir(rootPath)==None): # can't access to the folder, missing permission
-					isValid=True
-			except PermissionError:
-				print ("Access tenied to:", rootPath)
+			isValid=True
 		else:
 			print("Path doesn't exists, retry (or insert 'q' to quit)")
 

@@ -2,10 +2,9 @@
 
 Nexter gives you info about TvShows you're watching, like the date of next episode and will create an event on your calendar of it.
 
-
 ## The idea
 
-Fed up of missing shows episode, I created this script which fetch on  <a href="https://tvmaze.com>">TvMaze</a> the date and create in my calendar the event (.ics, importend on my calendar by a script).
+Fed up of missing shows episode, I created this script which fetch on  <a href="https://tvmaze.com>">TvMaze</a> the date and create in my calendar the event.
 
 And, gives you info if there'll be another seasons or if the shows has been cancelled.
 
@@ -23,6 +22,9 @@ And, gives you info if there'll be another seasons or if the shows has been canc
 ## Usage
 
 `$ python3 nexter.py`
+
+_Optional_ with parameters
+`$ python3 nexter.py {path} {option(1,2,3)}`
 
 * option 1: show all tv series
 * option 2: print just the running tv shows
