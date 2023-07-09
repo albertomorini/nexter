@@ -13,7 +13,7 @@ import platform
 ### UTILITY
 
 def serializeJSON(dir, filename, dataDictionary):
-	with open(dir+"/"+filename,"a", encoding='utf-8') as fileToStore:
+	with open(dir+"/"+filename,"w", encoding='utf-8') as fileToStore:
    		json.dump(dataDictionary, fileToStore, ensure_ascii=False)
 
 def readJson(path):
