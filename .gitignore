@@ -6,3 +6,6 @@
 ./__pycache__
 __pycache__/tvMazeAPI.cpython-311.pyc
 tvShowsReport.json
+tvShowsReport.json
+.gitignore
+__pycache__/tvMazeAPI.cpython-311.pyc
