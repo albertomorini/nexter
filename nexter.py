@@ -8,6 +8,7 @@ import sys
 import json
 import hashlib
 import platform
+import time
 
 ##########################################
 ### UTILITY
@@ -67,7 +68,6 @@ def createCalendarEvent(nameShow, dateNextEpisode):
 	event.add('dtstamp', datetime(int(dateTMP[0]), int(dateTMP[1]), int(dateTMP[2]), 0, 0, 0, tzinfo=pytz.utc))
 
 	outputPath=os.path.join("./events/", doMD5(nameShow)+'.ics') #store the event as ics (hash of the tvshow title)
-
 	# Adding events to calendar
 	cal.add_component(event)
 	#store the ics file
@@ -89,7 +89,7 @@ def updateCalender(dictShows):
 				pass #TODO: I really don't know windows
 
 	print("Done! Check your calendar app")
-	cleanEventsFolder()
+	
 
 ## remove the files created even if the old event doesn't bother us (we're going to overwrite on the next scan, cause file is stored with hash of tv title) 
 def cleanEventsFolder():
@@ -161,5 +161,7 @@ def menu():
 		filterPrinting(news,True) 
 	elif(x==3):
 		updateCalender(news)
+		time.sleep(3) # wait some time before delete events
+		cleanEventsFolder()
 
 menu()
