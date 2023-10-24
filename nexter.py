@@ -161,7 +161,7 @@ def menu():
 		filterPrinting(news,True) 
 	elif(x==3):
 		updateCalender(news)
-		time.sleep(3) # wait some time before delete events
+		time.sleep(10) # wait some time before delete events
 		cleanEventsFolder()
 
 menu()
